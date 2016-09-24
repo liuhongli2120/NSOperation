@@ -16,9 +16,18 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    [self NSOperation];
 }
 
+
+- (void)NSOperation {
+    NSInvocationOperation *op = [[NSInvocationOperation alloc]initWithTarget:self selector:@selector(demo:) object:@"__FUNCTION__"];
+    [op start];
+}
+
+- (void)demo:(id)obj {
+    NSLog(@"%@ %@", [NSThread currentThread], obj);
+}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
