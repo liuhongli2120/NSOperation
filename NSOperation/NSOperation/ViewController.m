@@ -27,11 +27,61 @@
 - (void)setupOP {
     _queue = [[NSOperationQueue alloc]init];
 //    [self demo3];
-    [self demo4];
+//    [self demo4];
 //    [self demo5];
+//    [self demo6];
+//    [self demo7];
+    [self demo8];
+}
+
+//常用线程间通讯
+- (void)demo8 {
+    [_queue addOperationWithBlock:^{
+        [NSThread sleepForTimeInterval:3.0];
+        NSLog(@"耗时操作 %@", [NSThread currentThread]);
+        NSString *json = @"This is Json";
+        [[NSOperationQueue mainQueue]addOperationWithBlock:^{
+            NSLog(@"mainQueue %@, %@", [NSThread currentThread], json);
+        }];
+    }];
+    
 }
 
 
+#pragma mark - 执行块
+//设置执行块
+- (void)demo7 {
+    NSBlockOperation *blockOP = [NSBlockOperation blockOperationWithBlock:^{
+        NSLog(@"blockOP %@", [NSThread currentThread]);
+    }];
+    [blockOP addExecutionBlock:^{
+        [NSThread sleepForTimeInterval:1.0];
+        NSLog(@"inExecutionBlock %@", [NSThread currentThread]);
+    }];
+    [_queue addOperation:blockOP];
+    NSLog(@"outExecutionBlock%@", blockOP.executionBlocks);
+}
+
+
+#pragma mark - 优先级设置
+- (void)demo6 {
+    NSBlockOperation *blockOP1 = [NSBlockOperation blockOperationWithBlock:^{
+        for (NSInteger i = 0; i < 10; i++) {
+            [NSThread sleepForTimeInterval:0.5];
+            NSLog(@"Interactive %@", [NSThread currentThread]);
+        }
+    }];
+    blockOP1.qualityOfService = NSQualityOfServiceUserInteractive;
+    [_queue addOperation:blockOP1];
+    
+    NSBlockOperation *blockOP2 = [NSBlockOperation blockOperationWithBlock:^{
+        for (NSInteger i = 0; i < 10; i++) {
+            NSLog(@"BackGround %@", [NSThread currentThread]);
+        }
+    }];
+    blockOP2.qualityOfService = NSQualityOfServiceBackground;
+    [_queue addOperation:blockOP2];
+}
 
 
 #pragma mark - NSBlockOperation
